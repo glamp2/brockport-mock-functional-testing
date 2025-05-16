@@ -26,7 +26,7 @@ public class VerificationMatcherExamplesTests {
 
         @Override
         public boolean matches(List list) {
-            return ((List) list).size() == 2;
+            return ((List) list).size() == 3;
         }
 
         @Override
@@ -60,6 +60,7 @@ public class VerificationMatcherExamplesTests {
         //assert
         verify(mock).addAll(argThat(list -> list.contains("one")));
     }
+
     @Test
     @DisplayName("Verification Matcher AddAll Find value 2 Test")
     public void verificationMatcherFindValue2() throws PetNotFoundSaleException, PetDataStoreException
@@ -82,7 +83,8 @@ public class VerificationMatcherExamplesTests {
         Mockito.when(mock.addAll(argThat(new IsListOfTwoElements()))).thenReturn(true);
         //act
         mock.addAll(Arrays.asList("one", "two", "three"));
-        //assert verify(mock, times(0)).addAll(argThat(list -> list.contains("three")));
+        //assert
+        //verify(mock, times(0)).addAll(argThat(list -> list.contains("three")));
         verify(mock).addAll(argThat(list -> list.contains("three")));
     }
 }

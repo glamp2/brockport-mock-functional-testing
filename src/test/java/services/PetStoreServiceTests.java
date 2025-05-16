@@ -341,5 +341,62 @@ public class PetStoreServiceTests
 
         return inventoryTests.stream();
     }
+
+    @Test
+    @Order(5)
+    @DisplayName("Find Pet By ID and Type Test")
+    public void findPetByIdAndTypeTest() throws PetNotFoundSaleException, DuplicatePetStoreRecordException, PetDataStoreException {
+        // Select a pet to be found
+        PetEntity targetPet = myPets.get(0); // First dog in the list
+        int petId = targetPet.getPetId();
+        PetType petType = targetPet.getPetType();
+
+        // Mock the repository method
+        Mockito.doReturn(targetPet).when(petRepository).findPetByPetTypeAndPetId(petType, petId);
+
+        // Using the correct method name and parameter order from the actual service
+        PetEntity foundPet = petService.getPetByIdAndType(petType, petId);
+
+        // Verify the repository method was called with correct parameters
+        verify(petRepository).findPetByPetTypeAndPetId(
+                (PetType) petTypeCaptor.capture(),
+                (Integer) petIdCaptor.capture()
+        );
+
+        // Verify the captured arguments match what was passed
+        assertEquals(petType, petTypeCaptor.getValue());
+        assertEquals(petId, petIdCaptor.getValue());
+
+        // Verify the returned pet is the expected one
+        assertNotNull(foundPet);
+        assertEquals(targetPet, foundPet);
+        assertEquals(petId, foundPet.getPetId());
+        assertEquals(petType, foundPet.getPetType());
+    }
+
+    @Test
+    @DisplayName("Test getInventory method in PetInventoryService")
+    void testGetInventory() throws PetDataStoreException {
+        // Mock the petRepository's getPetInventory method to return a predefined list of pets
+        List<PetEntity> mockPets = new ArrayList<>(Arrays.asList(
+                new DogEntity(AnimalType.DOMESTIC, FUR, Gender.MALE, Breed.MALTESE, new BigDecimal("750.00"), 1),
+                new DogEntity(AnimalType.DOMESTIC, FUR, Gender.MALE, Breed.POODLE, new BigDecimal("650.00"), 2),
+                new CatEntity(AnimalType.DOMESTIC, Skin.HAIR, Gender.FEMALE, Breed.BURMESE, new BigDecimal("65.00"), 3)
+        ));
+
+        Mockito.lenient().doReturn(mockPets).when(petRepository).getPetInventory();
+
+        // Call the service method
+        List<PetEntity> returnedInventory = petService.getInventory();
+
+        // Verify that the repository's getPetInventory method was called exactly once
+        verify(petRepository, times(1)).getPetInventory();
+
+        // Validate that the returned inventory is the same as the mock data
+        assertNotNull(returnedInventory, "Returned inventory should not be null");
+        assertEquals(3, returnedInventory.size(), "Inventory size should be 3");
+        assertTrue(returnedInventory.containsAll(mockPets), "Returned inventory should contain all mock pets");
+    }
+
     //What other tests could we add here?
 }
